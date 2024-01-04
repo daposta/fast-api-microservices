@@ -15,7 +15,6 @@ while True:
         results = redis.xreadgroup(group, key, {key: ">"}, None)
 
         if results != []:
-            print(results)
             for result in results:
                 obj = result[1][0][1]  # result[0][1][0][1]
                 order = Order.get(obj["pk"])

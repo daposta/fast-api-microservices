@@ -6,12 +6,10 @@ import os
 load_dotenv()
 
 redis = get_redis_connection(
-    host=os.getenv(
-        "REDIS_HOST"
-    ),  # "redis-13265.c242.eu-west-1-2.ec2.cloud.redislabs.com",
+    host=os.getenv("REDIS_HOST"),
     port=os.getenv("PORT"),
     decode_responses=True,
-    password=os.getenv("DB_PASS"),  # "CNoroCPSNMEXkr1T2XTiQGTDgVOQmz4K",
+    password=os.getenv("DB_PASS"),
 )
 
 
