@@ -1,8 +1,8 @@
 from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from models import Product
-from redis_om import HashModel, get_redis_connection
 
 
 app = FastAPI()
@@ -14,22 +14,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-redis = get_redis_connection(
-    host="redis-13265.c242.eu-west-1-2.ec2.cloud.redislabs.com",
-    port=13265,
-    decode_responses=True,
-    password="CNoroCPSNMEXkr1T2XTiQGTDgVOQmz4K",
-)
-
-
-class Product(HashModel):
-    name: str
-    price: float
-    quantity: int
-
-    class Meta:
-        database = redis
 
 
 def format(pk: str):

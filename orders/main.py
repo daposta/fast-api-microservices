@@ -2,9 +2,11 @@ from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.background import BackgroundTasks
-from redis_om import HashModel, get_redis_connection
+
 from starlette.requests import Request
 import requests, time
+
+from models import Order, redis
 
 
 app = FastAPI()
@@ -16,25 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-redis = get_redis_connection(
-    host="redis-13265.c242.eu-west-1-2.ec2.cloud.redislabs.com",
-    port=13265,
-    decode_responses=True,
-    password="CNoroCPSNMEXkr1T2XTiQGTDgVOQmz4K",
-)
-
-
-class Order(HashModel):
-    product_id: str
-    price: float
-    fee: float
-    total: float
-    quantity: int
-    status: str  # pending/completed/refunded
-
-    class Meta:
-        database = redis
 
 
 def format(pk: str):
@@ -61,7 +44,7 @@ async def create_order(request: Request, tasks: BackgroundTasks):
     body = await request.json()
 
     product = requests.get(f"http://localhost:8000/products/{body['id']}").json()
-
+    print(product)
     order = Order(
         product_id=body["id"],
         price=product["price"],
@@ -71,13 +54,13 @@ async def create_order(request: Request, tasks: BackgroundTasks):
         status="pending",
     )
     order.save()
+    redis.xadd("order_completed", order.dict(), "*")
     tasks.add_task(complete_order, order)
-    # complete_order(order)
     return order
 
 
 def complete_order(order: Order):
-    time.sleep(5)
+    time.sleep(2)
     order.status = "completed"
     order.save()
 
@@ -85,6 +68,7 @@ def complete_order(order: Order):
 @app.get("/orders/{pk}")
 def get_order(pk: str):
     order = Order.get(pk)
+    redis.xadd("refund_order", order.dict(), "*")
     return order
 
 

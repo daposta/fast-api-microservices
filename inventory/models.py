@@ -1,10 +1,17 @@
 from redis_om import HashModel, get_redis_connection
+from dotenv import load_dotenv
+import os
+
+# Load .env file
+load_dotenv()
 
 redis = get_redis_connection(
-    host="redis-14779.c78.eu-west-1-2.ec2.cloud.redislabs.com",
-    port=14779,
+    host=os.getenv(
+        "REDIS_HOST"
+    ),  # "redis-13265.c242.eu-west-1-2.ec2.cloud.redislabs.com",
+    port=os.getenv("PORT"),
     decode_responses=True,
-    password="1uRRQlteLfFKbUVLt5yx10jYcpj03xlk",
+    password=os.getenv("DB_PASS"),  # "CNoroCPSNMEXkr1T2XTiQGTDgVOQmz4K",
 )
 
 
